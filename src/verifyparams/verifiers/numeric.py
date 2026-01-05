@@ -134,7 +134,7 @@ def verify_numeric(
     # Check for positive requirement
     if is_positive and value <= 0:
         raise ValueError(
-            f"Expected {param_name!r} to be positive (greater than 0); "
+            f"Expected {param_name!r} to be positive (greater than 0), "
             f"got {value!r}"
         )
     
@@ -152,7 +152,7 @@ def verify_numeric(
         if len(limits) != 2:
             raise ValueError(
                 "Expected 'limits' to be a list of two elements "
-                f"[lower, upper]; got {limits!r}"
+                f"[lower, upper], got {limits!r}"
             )
         
         lower, upper = limits[0], limits[1]
@@ -164,7 +164,7 @@ def verify_numeric(
         else:
             raise ValueError(
                 "Expected 'boundary' to be one either 'inclusive' or "
-                f"'exclusive'; got {boundary!r}"
+                f"'exclusive', got {boundary!r}"
             )
         
         if not in_range:
@@ -175,7 +175,7 @@ def verify_numeric(
                 error_msg = f"strictly between {lower} and {upper} (exclusive)"
             
             raise ValueError(
-                f"Expected {param_name!r} to be {error_msg}; got {value!r}"
+                f"Expected {param_name!r} to be {error_msg}, got {value!r}"
             )
     
     # Return appropriate type

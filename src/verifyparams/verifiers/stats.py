@@ -17,7 +17,7 @@ def verify_sta_conf_level(
         value = float(level)
     except (ValueError, TypeError):
         raise TypeError(
-            f"Expected {param_name!r} to be numeric; "
+            f"Expected {param_name!r} to be numeric, "
             f"got {type(value).__name__}"
         )
     
@@ -35,7 +35,7 @@ def verify_sta_conf_level(
     # Not allowed value(s) found
     allowed_str = ", ".join(str(v) for v in sorted(allowed))
     raise ValueError(
-        f"Expected {param_name!r} to be one of: {allowed_str}; "
+        f"Expected {param_name!r} to be one of: {allowed_str}, "
         f"got {value}"
     )
 
@@ -54,7 +54,7 @@ def verify_sta_sig_level(
         value = float(level)
     except (ValueError, TypeError):
         raise TypeError(
-            f"Expected {param_name!r} to be numeric; "
+            f"Expected {param_name!r} to be numeric, "
             f"got {type(level).__name__}"
         )
     
@@ -72,7 +72,7 @@ def verify_sta_sig_level(
     # Not allowed value(s) found
     allowed_str = ", ".join(str(v) for v in sorted(allowed))
     raise ValueError(
-        f"Expected {param_name!r} to be one of: {allowed_str}; "
+        f"Expected {param_name!r} to be one of: {allowed_str}, "
         f"got {value}"
     )
     
@@ -92,7 +92,7 @@ def verify_sta_alternative(
             alternative = str(alternative)
         except TypeError as e:
             raise TypeError(
-                f"Expected {param_name!r} to be a string; "
+                f"Expected {param_name!r} to be a string, "
                 f"got {type(alternative).__name__}"
             ) from e
         except ValueError as e:
@@ -130,6 +130,6 @@ def verify_sta_alternative(
     # Not a valid alternative
     allowed_str = ", ".join(f"{v}" for v in sorted(allowed))
     raise ValueError(
-        f"Expected {param_name!r} to be one of: {allowed_str}; "
+        f"Expected {param_name!r} to be one of: {allowed_str}, "
         f"got {alternative!r}"
     )

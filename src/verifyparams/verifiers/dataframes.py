@@ -50,7 +50,7 @@ def verify_axis(
     >>> verify_axis(None)
     None
     >>> verify_axis(2)
-    ValueError: Expected 'axis' to be 0 or 1; got 2
+    ValueError: Expected 'axis' to be 0 or 1, got 2
     """
     # Handle None
     if value is None:
@@ -74,7 +74,7 @@ def verify_axis(
             return 1
         else:
             raise ValueError(
-                f"Expected {param_name!r} to be 0 or 1; got {value}"
+                f"Expected {param_name!r} to be 0 or 1, got {value}"
             )
     
     # Handle strings
@@ -123,7 +123,7 @@ def verify_axis(
     options_str = ', '.join(valid_options)
     
     raise ValueError(
-        f"Expected {param_name!r} to be one of: {options_str}; "
+        f"Expected {param_name!r} to be one of: {options_str}, "
         f"got {value!r}"
     )
     
@@ -187,7 +187,7 @@ def verify_dframe(
             df = DataFrame(user_input)
         except TypeError as e:
             raise TypeError(
-                f"Expected {param_name!r} to be a DataFrame; "
+                f"Expected {param_name!r} to be a DataFrame, "
                 f"got {type(user_input).__name__}"
             ) from e
         except ValueError as e:
@@ -196,7 +196,7 @@ def verify_dframe(
             ) from e
     else:
         raise TypeError(
-            f"Expected {param_name!r} to be a DataFrame; "
+            f"Expected {param_name!r} to be a DataFrame, "
             f"got {type(user_input).__name__}"
         ) from e
     
@@ -210,7 +210,7 @@ def verify_dframe(
     
     if require_index and df.index.isna().all():
         raise ValueError(
-            f"Expected {param_name!r} to have a meaningful index; "
+            f"Expected {param_name!r} to have a meaningful index, "
             f"got no index"
         )
     
@@ -269,7 +269,7 @@ def verify_series(
     Series with single value 5
     """
     msg_type = (
-        f"Expected {param_name!r} to be a Series; "
+        f"Expected {param_name!r} to be a Series, "
         f"got {type(user_input).__name__}"
     )
     msg_value = f"{param_name!r} cannot be converted to a Series: {e}"
@@ -305,7 +305,7 @@ def verify_series(
     # Validate requirements
     if require_name and s.name is None:
         raise ValueError(
-            f"Expected {param_name!r} to have a name; got no name"
+            f"Expected {param_name!r} to have a name, got no name"
         )
     
     return s
@@ -336,7 +336,7 @@ def verify_df_columns(
     # Handle None
     if names is None:
         raise ValueError(
-            f"Expected {param_name!r} to be a list of column names; got None"
+            f"Expected {param_name!r} to be a list of column names, got None"
         )
     
     # Handle single string
@@ -353,14 +353,14 @@ def verify_df_columns(
         except TypeError:
             raise TypeError(
                 f"Expected {param_name!r} to be a string or a list of "
-                f"strings; got {type(names).__name__}"
+                f"strings, got {type(names).__name__}"
             )
     
     # Validate all are strings
     for i, name in enumerate(names_list):
         if not isinstance(name, str):
             raise TypeError(
-                f"Expected {param_name!r}[{i}] to be a string; "
+                f"Expected {param_name!r}[{i}] to be a string, "
                 f"got {type(name).__name__}"
             )
         if not name:  # Empty string
@@ -369,7 +369,7 @@ def verify_df_columns(
     # Check duplicates
     if not allow_duplicates and len(names_list) != len(set(names_list)):
         raise ValueError(
-            "Expected 'param_name' to be unique; got duplicated values"
+            "Expected 'param_name' to be unique, got duplicated values"
         )
     
     return names_list

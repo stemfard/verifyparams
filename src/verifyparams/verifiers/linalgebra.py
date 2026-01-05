@@ -56,7 +56,7 @@ def verify_array_or_matrix(
         except Exception as e:
             raise TypeError(
                 f"Expected {param_name!r} to be array-like, Matrix, "
-                f"or DataFrame; got {original_type.__name__}"
+                f"or DataFrame, got {original_type.__name__}"
             ) from e
     
     # Validate shape
@@ -64,24 +64,24 @@ def verify_array_or_matrix(
     
     if len(shape) != 2:
         raise ValueError(
-            f"Expected {param_name!r} to be 2-dimensional; "
+            f"Expected {param_name!r} to be 2-dimensional, "
             f"got shape = {shape}"
         )
     
     # Validate dimensions
     if nrows is not None and shape[0] != nrows:
         raise ValueError(
-            f"Expected {param_name!r} to have {nrows} rows; got {shape[0]}"
+            f"Expected {param_name!r} to have {nrows} rows, got {shape[0]}"
         )
     
     if ncols is not None and shape[1] != ncols:
         raise ValueError(
-            f"Expected {param_name!r} to have {ncols} columns; got {shape[1]}"
+            f"Expected {param_name!r} to have {ncols} columns, got {shape[1]}"
         )
     
     if is_square and shape[0] != shape[1]:
         raise ValueError(
-            f"Expected {param_name!r} to be square; got shape = {shape}"
+            f"Expected {param_name!r} to be square, got shape = {shape}"
         )
     
     return result
@@ -116,7 +116,7 @@ def verify_array_or_matrix_square(
             A = asarray(A)
         except TypeError as e:
             raise TypeError(
-                f"Expected {param_name!r} to be array-like; "
+                f"Expected {param_name!r} to be array-like, "
                 f"got {type(A).__name__}"
             ) from e
     
@@ -168,7 +168,7 @@ def verify_linear_system(
         A = asarray(A)
     except TypeError as e:
         raise TypeError(
-            f"Expected {param_name_A!r} to be a numeric array; "
+            f"Expected {param_name_A!r} to be a numeric array, "
             f"got {type(A).__name__}"
         ) from e
     except ValueError as e:
@@ -178,7 +178,7 @@ def verify_linear_system(
         b = asarray(b)
     except TypeError as e:
         raise TypeError(
-            f"Expected {param_name_b!r} to be a numeric array; "
+            f"Expected {param_name_b!r} to be a numeric array, "
             f"got {type(b).__name__}"
         ) from e
     except ValueError as e:
@@ -198,12 +198,12 @@ def verify_linear_system(
             b = b.flatten()  # Row vector to 1D
         else:
             raise ValueError(
-                f"Expected {param_name_b!r} to be a vector (1D array); "
+                f"Expected {param_name_b!r} to be a vector (1D array), "
                 f"got 2D array with shape {b.shape}"
             )
     elif b.ndim != 1:
         raise ValueError(
-            f"Expected {param_name_b!r} to be a vector (1D array); "
+            f"Expected {param_name_b!r} to be a vector (1D array), "
             f"got {b.ndim}D array"
         )
     
@@ -214,14 +214,14 @@ def verify_linear_system(
     if a_rows != b_len:
         raise ValueError(
             f"Expected number of rows of {param_name_A!r} to be equal to the "
-            f"number of elements of {param_name_b!r}; got "
+            f"number of elements of {param_name_b!r}, got "
             f"{param_name_A!r} ({A.shape}) vs {param_name_b!r} ({b.shape})"
         )
     
     # Optional square matrix check
     if require_square and a_rows != a_cols:
         raise ValueError(
-            f"Expected {param_name_A!r} to be a square array/matrix; "
+            f"Expected {param_name_A!r} to be a square array/matrix, "
             f"got shape ({a_rows}, {a_cols})"
         )
         

@@ -44,7 +44,7 @@ def verify_elements_in_range(
     [1, 2, 3]
     
     >>> verify_elements_in_range([1, 2, 6], 0, 5, "scores")
-    ValueError: Expected all values of 'scores' to be between 0 and 5 inclusive; 
+    ValueError: Expected all values of 'scores' to be between 0 and 5 inclusive, 
     got 6
     
     >>> verify_elements_in_range([1.0, 2.0, 3.0], 0, 4)
@@ -70,7 +70,7 @@ def verify_elements_in_range(
         
         raise ValueError(
             f"Expected all values of {par_name!r} to be between "
-            f"{lower_fmt} and {upper_fmt} inclusive; got {elements_str}"
+            f"{lower_fmt} and {upper_fmt} inclusive, got {elements_str}"
         )
     
     # Return the formatted list for consistency
@@ -110,7 +110,7 @@ def verify_all_integers(
             iterable = enumerate(value)
         except TypeError:
             raise TypeError(
-                f"Expected {param_name!r} to be list, tuple or ndarray; "
+                f"Expected {param_name!r} to be list, tuple or ndarray, "
                 f"got {type(value).__name__}"
             )
     
@@ -136,7 +136,7 @@ def verify_all_integers(
         if n == 1:
             idx, val = non_integers[0]
             raise ValueError(
-                f"Expected all values of {param_name!r} to be integers; "
+                f"Expected all values of {param_name!r} to be integers, "
                 f"got a non-integer at index {idx}: {val!r}"
             )
         else:
@@ -186,7 +186,7 @@ def verify_all_positive(
             values = list(user_input)
         except TypeError as e:
             raise TypeError(
-                f"Expected {param_name!r} to be iterable; "
+                f"Expected {param_name!r} to be iterable, "
                 f"got {type(user_input).__name__}"
             ) from e
     
@@ -412,7 +412,7 @@ def verify_diff_constant(
         If differences between consecutive elements are not constant.
     """
     msg = (
-        f"Expected {param_name!r} to be numeric array-like; "
+        f"Expected {param_name!r} to be numeric array-like, "
         f"got {type(user_input).__name__}"
     )
     
@@ -484,7 +484,7 @@ def verify_strictly_increasing(
         arr = asarray(user_input, dtype=float64)
     except TypeError as e:
         raise TypeError(
-            f"Expected {param_name!r} to be numeric array-like; "
+            f"Expected {param_name!r} to be numeric array-like, "
             f"got {type(user_input).__name__}"
         ) from e
     except ValueError as e:
@@ -523,20 +523,20 @@ def verify_distinct(
     # Type validation
     if not isinstance(x, (list, tuple, ndarray)):
         raise TypeError(
-            f"Expected {param_name_x!r} to be a list, tuple, or ndarray; "
+            f"Expected {param_name_x!r} to be a list, tuple, or ndarray, "
             f"got {type(x).__name__}"
         )
     
     if not isinstance(y, (list, tuple, ndarray)):
         raise TypeError(
-            f"Expected {param_name_y!r} to be a list, tuple, or ndarray; "
+            f"Expected {param_name_y!r} to be a list, tuple, or ndarray, "
             f"got {type(y).__name__}"
         )
     
     # Length check
     if check_length and len(x) != len(y):
         raise ValueError(
-            f"Expected both arrays to have the same length; "
+            f"Expected both arrays to have the same length, "
             f"got {param_name_x!r} (len={len(x)}) and "
             f"{param_name_y!r} (len={len(y)})"
         )
@@ -552,14 +552,14 @@ def verify_distinct(
             if allclose(x, y, rtol=tolerance, atol=tolerance):
                 raise ValueError(
                     f"Expected arrays {param_name_x!r} and {param_name_y!r} "
-                    "to be distinct; got identical arrays (within tolerance "
+                    "to be distinct, got identical arrays (within tolerance "
                     f"{tolerance})"
                 )
         except (TypeError, ValueError): # Non-numeric arrays will faile
             if array_equal(x, y): # so use exact equality
                 raise ValueError(
                     f"Expected arrays {param_name_x!r} and {param_name_y!r} "
-                    f"to be distinct; got identical arrays"
+                    f"to be distinct, got identical arrays"
                 )
         return x, y
     
@@ -571,7 +571,7 @@ def verify_distinct(
     # all elements were equal
     raise ValueError(
         f"Expected arrays {param_name_x!r} and {param_name_y!r} to be "
-        f"distinct; got identical arrays"
+        f"distinct, got identical arrays"
     )
     
 
@@ -623,7 +623,7 @@ def verify_not_constant(
         arr = asarray(user_input)
     except TypeError as e:
         raise TypeError(
-            f"Expected {param_name!r} to be array-like; "
+            f"Expected {param_name!r} to be array-like, "
             f"got {type(user_input).__name__}"
         ) from e
     except ValueError as e:

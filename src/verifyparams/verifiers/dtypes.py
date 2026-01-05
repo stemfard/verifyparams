@@ -62,7 +62,7 @@ def verify_int(value: Any, param_name: str) -> int:
     
     if not isinstance(value, int):
         raise TypeError(
-            f"Expected {param_name!r} to be an integer; "
+            f"Expected {param_name!r} to be an integer, "
             f"got {type(value).__name__}"
         )
         
@@ -73,7 +73,7 @@ def verify_float(value: Any, param_name: str) -> float:
     
     if not isinstance(value, float):
         raise TypeError(
-            f"Expected {param_name!r} to be an integer; "
+            f"Expected {param_name!r} to be an integer, "
             f"got {type(value).__name__}"
         )
         
@@ -84,7 +84,7 @@ def verify_int_or_float(value: Any, param_name: str) -> float:
     
     if not isinstance(value, (int, float)):
         raise TypeError(
-            f"Expected {param_name!r} to be an integer or float; "
+            f"Expected {param_name!r} to be an integer or float, "
             f"got {type(value).__name__}"
         )
         
@@ -95,7 +95,7 @@ def verify_complex(value: Any, param_name: str) -> complex:
     
     if not isinstance(value, complex):
         raise TypeError(
-            f"Expected {param_name!r} to be a complex number (a + bi); "
+            f"Expected {param_name!r} to be a complex number (a + bi), "
             f"got {type(value).__name__}"
         )
         
@@ -133,7 +133,7 @@ def verify_positive(
     verify_int_or_float(value=value, param_name=param_name)
 
     # Check positivity
-    msg = f"Expected {param_name!r} to be positive; got {value}"
+    msg = f"Expected {param_name!r} to be positive, got {value}"
     if strict:
         if value <= 0:
             raise ValueError(msg.replace("positive", "strictly positive"))

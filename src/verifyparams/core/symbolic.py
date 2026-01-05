@@ -16,7 +16,7 @@ def _symbolic_expr_err(
     else:
         msg = "be a symbolic variable or expression"
     
-    return f"Expected {param_name!r} to {msg}; got {value!r}"
+    return f"Expected {param_name!r} to {msg}, got {value!r}"
 
 
 def sym_lambdify_expr(
@@ -85,7 +85,7 @@ def sym_lambdify_expr(
             if is_univariate and nvars != 1:
                 raise ValueError(
                     f"Expected {param_name!r} to be a univariate "
-                    f"polynomial; got {fexpr!r}"
+                    f"polynomial, got {fexpr!r}"
                 )
         else:
             msg = _symbolic_expr_err(
@@ -149,7 +149,7 @@ def sym_expr_to_numpy_function(equations: list[str]) -> Callable:
         # Ensure the input array has the correct length
         if len(x) != num_vars:
             raise ValueError(
-                f"Expected input array to have {num_vars} elements; "
+                f"Expected input array to have {num_vars} elements, "
                 f"got {len(x)}"
             )
         

@@ -59,7 +59,7 @@ class MembershipValidator(Generic[T]):
             items_str += f", ..., {len(self.valid_items) - k} more"
         
         raise ValueError(
-            f"Expected {param_name!r} to be one of: {items_str}; "
+            f"Expected {param_name!r} to be one of: {items_str}, "
             f"got {user_input!r}"
         )
 

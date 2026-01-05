@@ -66,7 +66,7 @@ def verify_string(
     # Type check
     if not isinstance(value, str):
         raise TypeError(
-            f"Expected {param_name!r} to be a string; "
+            f"Expected {param_name!r} to be a string, "
             f"got {type(value).__name__}"
         )
     
@@ -93,13 +93,13 @@ def verify_string(
         s = "" if min_length == 1 else "s"
         raise ValueError(
             f"Expected {param_name!r} to have at least {min_length} "
-            f"character{s}; got {length} character{s}"
+            f"character{s}, got {length} character{s}"
         )
     
     if max_length is not None and length > max_length:
         raise ValueError(
             f"Expected {param_name!r} to have at most {max_length} "
-            f"characters; got {length} characters"
+            f"characters, got {length} characters"
         )
     
     # Check allowed characters
@@ -148,7 +148,7 @@ def verify_string(
     elif str_case is not None and str_case not in ["lower", "upper", "title"]:
         raise ValueError(
             f"Expected {str_case!r} to be one of: 'lower', 'upper' or "
-            f"'title'; got {str_case!r}"
+            f"'title', got {str_case!r}"
         )
     
     return result

@@ -53,7 +53,7 @@ def verify_args_count(
         
         raise ValueError(
             f"Expected exactly {required_count} out of {total_args} arguments "
-            f"to be provided for '{ftn_name}()'; got {provided_count}.\n"
+            f"to be provided for '{ftn_name}()', got {provided_count}.\n"
             f"Provided: {provided_args}\n"
             f"Missing: {missing_args}"
         )

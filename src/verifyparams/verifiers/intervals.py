@@ -10,20 +10,20 @@ def verify_lower_lte_upper(
 
     if not isinstance(lower, (int, float)):
         raise TypeError(
-            f"Expected {param_name_lower!r} to be an integer or float; "
+            f"Expected {param_name_lower!r} to be an integer or float, "
             f"got {type(lower).__name__}"
         )
     
     if not isinstance(upper, (int, float)):
         raise TypeError(
-            f"Expected {param_name_upper!r} to be an integer or float; "
+            f"Expected {param_name_upper!r} to be an integer or float, "
             f"got {type(upper).__name__}"
         )
     
     if lower >= upper:
         raise ValueError(
             f"Expected {param_name_lower!r} to be less than "
-            f"{param_name_upper!r}; got {lower!r} and {upper!r}"
+            f"{param_name_upper!r}, got {lower!r} and {upper!r}"
         )
         
     return lower, upper
@@ -51,7 +51,7 @@ def verify_step_size(
     for name, val in [("start", start), ("stop", stop), ("step", step)]:
         if not isinstance(val, (int, float)):
             raise TypeError(
-                f"Expected {name!r} to be numeric; got {type(val).__name__}"
+                f"Expected {name!r} to be numeric, got {type(val).__name__}"
             )
     
     # Step cannot be effectively zero
