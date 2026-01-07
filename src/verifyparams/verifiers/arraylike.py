@@ -6,7 +6,7 @@ from numpy import (
 )
 
 from verifyparams.core._strings import str_data_join_contd
-from verifyparams.core._decimals import format_num
+from verifyparams.core._decimals import numeric_format
 
 
 def verify_elements_in_range(
@@ -56,9 +56,9 @@ def verify_elements_in_range(
     elements_outside = arr[(arr < lower) | (arr > upper)]
     
     if elements_outside:
-        lower_fmt = format_num(lower)
-        upper_fmt = format_num(upper)
-        outside_fmt = format_num(elements_outside)
+        lower_fmt = numeric_format(lower)
+        upper_fmt = numeric_format(upper)
+        outside_fmt = numeric_format(elements_outside)
         
         if len(elements_outside) == 1:
             elements_str = f"value {outside_fmt[0]}"
