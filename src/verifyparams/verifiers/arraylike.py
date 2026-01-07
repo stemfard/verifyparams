@@ -1,37 +1,39 @@
 from typing import Any
 
 from numpy import (
-    all, allclose, array, array_equal, asarray, float64, floating, isclose,
-    issubdtype, ndarray, diff, any, where
+    all, allclose, array_equal, asarray, count_nonzero, float64, floating,
+    fromiter, isclose, issubdtype, ndarray, diff, any, where
 )
 
-from verifyparams.core.decimals import format_num
+from verifyparams.core._strings import str_data_join_contd
+from verifyparams.core._decimals import format_num
 
 
 def verify_elements_in_range(
-    lst: list[int | float],
+    data: list[int | float] | ndarray,
     lower: int | float = 0,
     upper: int | float = 4,
-    par_name: str = "input"
+    par_name: str = "data"
 ) -> list[int | float]:
     """
-    Verify that all elements in the list are within the specified range.
+    Verify that all elements in the sequence are within the specified 
+    range.
     
     Parameters
     ----------
-    lst : list[int | float]
+    data : list[int | float]
         List of numerical elements to check.
     lower : int | float, optional (default=0)
         The lower bound of the range (inclusive).
     upper : int | float, optional (default=4)
         The upper bound of the range (inclusive).
-    par_name : str, optional (default="input")
+    par_name : str, optional (default="data")
         Name of the input parameter for error messages.
     
     Returns
     -------
-    list[int | float]
-        The input list if all elements are within range.
+    data : list | tuple | ndarray
+        The input sequence if all elements are within range.
     
     Raises
     ------
@@ -50,31 +52,25 @@ def verify_elements_in_range(
     >>> verify_elements_in_range([1.0, 2.0, 3.0], 0, 4)
     [1, 2, 3]
     """
-    
-    # Find elements outside the range
-    elements_outside = [x for x in lst if x < lower or x > upper]
+    arr = asarray(elements_outside)
+    elements_outside = arr[(arr < lower) | (arr > upper)]
     
     if elements_outside:
-        # Format bounds and elements for error message
         lower_fmt = format_num(lower)
         upper_fmt = format_num(upper)
-        
-        # Format the out-of-range elements
         outside_fmt = format_num(elements_outside)
         
-        # Create informative error message
         if len(elements_outside) == 1:
             elements_str = f"value {outside_fmt[0]}"
         else:
-            elements_str = f"values {', '.join(map(str, outside_fmt))}"
+            elements_str = f"values {str_data_join_contd(outside_fmt)}"
         
         raise ValueError(
             f"Expected all values of {par_name!r} to be between "
             f"{lower_fmt} and {upper_fmt} inclusive, got {elements_str}"
         )
     
-    # Return the formatted list for consistency
-    return format_num(lst)
+    return data
 
 
 def verify_all_integers(
@@ -92,11 +88,11 @@ def verify_all_integers(
     param_name : str
         Parameter name for error messages.
     allow_float_ints : bool
-        If True, allows floats like 1.0, 2.0.
+        If `True`, allows floats like 1.0, 2.0.
     
     Returns
     -------
-    List[int]
+    list[int]
         List of integers.
     """
     result = []
@@ -156,102 +152,68 @@ def verify_all_integers(
 
 
 def verify_all_positive(
-    user_input: Any,
-    param_name: str = 'input',
+    data: list | tuple | ndarray,
     include_zero: bool = False,
-    to_array: bool = False
-) -> list[float]:
+    to_array: bool = False,
+    param_name: str = 'data'
+) -> list | tuple | ndarray:
     """
     Simple and fast positive validation.
     
     Parameters
     ----------
-    user_input : Any
+    data : list | tuple | ndarray
         Input to validate.
-    param_name : str
-        Parameter name.
     include_zero : bool
         Whether to allow zero.
+    to_array : bool
+        Whether to convert to a Numpy array
+    param_name : str
+        Parameter name.
     
     Returns
     -------
-    List[float]
+    arr : list | tuple | ndarray
         Validated values.
     """
-    if isinstance(user_input, (list, tuple)):
-        values = user_input
+    if isinstance(data, ndarray):
+        arr = data
     else:
-        # Try to iterate
+        # Bulk conversion using numpy
         try:
-            values = list(user_input)
-        except TypeError as e:
+            if hasattr(data, '__len__') and not isinstance(data, (str, bytes)):
+                arr = asarray(data, dtype=float)
+            else:
+                # For generators/iterators, use `fromiter()` to avoid 
+                # intermediate lists
+                arr = fromiter(data, dtype=float)
+        except (ValueError, TypeError) as e:
             raise TypeError(
-                f"Expected {param_name!r} to be iterable, "
-                f"got {type(user_input).__name__}"
+                f"Cannot convert {param_name!r} to numeric array: {e}"
             ) from e
     
-    # Single-pass validation and conversion
-    result = []
-    errors = []
+    # Fast validation using numpy ufuncs
+    if include_zero:
+        invalid_count = count_nonzero(arr < 0)
+    else:
+        invalid_count = count_nonzero(arr <= 0)
     
-    for i, val in enumerate(values):
-        try:
-            # Convert to number
-            if isinstance(val, str):
-                num = float(val)
-                if num % 1 == 0:
-                    num = int(num)
-            elif isinstance(val, float):
-                num = float(val)
-            elif isinstance(val, int):
-                num = int(val)
-            else:
-                num = float(val)  # it will fail if not convertible
-                if num % 1 == 0:
-                    num = int(num)
-        except (ValueError, TypeError):
-            errors.append((i, val))
-            continue
-        
-        # Check positivity
+    if invalid_count > 0:
         if include_zero:
-            if num < 0:
-                errors.append((i, num))
-            else:
-                result.append(num)
+            invalid_values = arr[arr < 0]
         else:
-            if num <= 0:
-                errors.append((i, num))
-            else:
-                result.append(num)
+            invalid_values = arr[arr <= 0]
+        
+        s = "" if invalid_count == 1 else "s"
+        
+        raise ValueError(
+            f"Expected all values of {param_name!r} to be positive, got"
+            f"{invalid_count} negative or invalid value{s}: "
+            f"{str_data_join_contd(data=invalid_values)}"
+        )
     
-    # Handle errors
-    if errors:
-        if len(errors) == 1:
-            idx, val = errors[0]
-            raise ValueError(
-                f"Expected all values of {param_name!r} to be "
-                f"{'non-negative' if include_zero else 'positive'}, "
-                f"got invalid value at index {idx}: {val}"
-            )
-        else:
-            error_examples = ", ".join(
-                f"index {idx}: {val}" for idx, val in errors[:3]
-            )
-            if len(errors) > 3:
-                error_examples += f" ... and {len(errors) - 3} more"
-            
-            raise ValueError(
-                f"Expected all values of {param_name!r} to be "
-                f"{'non-negative' if include_zero else 'positive'}, "
-                f"got {len(errors)} invalid values: {error_examples}"
-            )
-            
-    if to_array:
-        result = array(result)
+    return arr if to_array else data
     
-    return result
-
 
 class LengthMismatchError(ValueError):
     """
@@ -662,5 +624,4 @@ def verify_not_constant(
     elif isinstance(user_input, list):
         return arr.tolist()
     else:
-        # Preserve original type if possible
         return user_input if hasattr(user_input, '__iter__') else arr.tolist()
