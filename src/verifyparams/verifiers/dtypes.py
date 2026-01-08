@@ -1,3 +1,4 @@
+import math
 from typing import Any
 
 
@@ -58,7 +59,7 @@ def verify_boolean(
     return default
 
 
-def verify_int(value: Any, param_name: str) -> int:
+def verify_int(value: Any, param_name: str = "value") -> int:
     
     if not isinstance(value, int):
         raise TypeError(
@@ -69,7 +70,7 @@ def verify_int(value: Any, param_name: str) -> int:
     return value
     
 
-def verify_float(value: Any, param_name: str) -> float:
+def verify_float(value: Any, param_name: str = "value") -> float:
     
     if not isinstance(value, float):
         raise TypeError(
@@ -77,10 +78,12 @@ def verify_float(value: Any, param_name: str) -> float:
             f"got {type(value).__name__}"
         )
         
+    verify_finite(value=value, param_name=param_name)
+        
     return value
 
 
-def verify_int_or_float(value: Any, param_name: str) -> float:
+def verify_int_or_float(value: Any, param_name: str = "value") -> float:
     
     if not isinstance(value, (int, float)):
         raise TypeError(
@@ -88,10 +91,22 @@ def verify_int_or_float(value: Any, param_name: str) -> float:
             f"got {type(value).__name__}"
         )
         
+    verify_finite(value=value, param_name=param_name)
+        
     return value
 
 
-def verify_complex(value: Any, param_name: str) -> complex:
+def verify_finite(value: Any, param_name: str = "value") -> int | float:
+    
+    if not math.isfinite(value):
+        raise ValueError(
+            f"Expected a finite number for {param_name!r}, got {value}"
+        )
+    
+    return value
+
+
+def verify_complex(value: Any, param_name: str = "value") -> complex:
     
     if not isinstance(value, complex):
         raise TypeError(
