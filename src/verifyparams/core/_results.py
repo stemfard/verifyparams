@@ -2,6 +2,7 @@ import copy
 from dataclasses import field
 from typing import Any, Iterator
 
+
 class Result:
     """
     Generic result container for any function.

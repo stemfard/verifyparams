@@ -6,6 +6,7 @@ from numpy import (
     issubdtype, ndarray, ndindex
 )
 
+
 try:
     import numba
     HAS_NUMBA = True
@@ -47,19 +48,15 @@ def numeric_format(value: Any) -> Any:
     if isinstance(value, ndarray):
         return _format_array(value)
     
-    # Handle Python lists
     if isinstance(value, list):
         return [numeric_format(v) for v in value]
     
-    # Handle Python tuples
     if isinstance(value, tuple):
         return tuple(numeric_format(v) for v in value)
     
-    # Handle Python float
     if isinstance(value, float):
         return int(value) if value.is_integer() else value
     
-    # Handle Python int
     if isinstance(value, int):
         return value
     

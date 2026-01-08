@@ -298,17 +298,15 @@ def verify_len_equal(
     if n_arrays <= 1:
         return arrays
     
-    # Setup parameter names
     if param_names is None:
         param_names = [f"array{i + 1}" for i in range(n_arrays)]
     
     if len(param_names) != n_arrays:
         raise ValueError(
-            f"`param_names` length ({len(param_names)}) must match "
-            f"arrays count ({n_arrays})"
+            f"Expected {n_arrays} 1D arrays for 'param_names'; "
+            f"got {len(param_names)}"
         )
     
-    # Get lengths
     lengths = []
     for i, arr in enumerate(arrays):
         try:

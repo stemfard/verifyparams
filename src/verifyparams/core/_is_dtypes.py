@@ -46,25 +46,25 @@ def is_symexpr(obj: Any) -> bool:
     >>> import sympy as sym
     >>> x, y = sym.symbols('x y')
     
-    >>> is_symexpr(sym.pi/4)      # Constant expression
+    >>> is_symexpr(sym.pi/4)
     False
     
-    >>> is_symexpr(sym.pi/x)      # Contains variable x
+    >>> is_symexpr(sym.pi/x)
     True
     
-    >>> is_symexpr(x**2 + x*y - 5)  # Multiple variables
+    >>> is_symexpr(x**2 + x*y - 5)
     True
     
-    >>> is_symexpr('x**2 + y')   # String input
+    >>> is_symexpr('x**2 + y')
     True
     
-    >>> is_symexpr('3.14')       # Numeric string
+    >>> is_symexpr('3.14')
     False
     
-    >>> is_symexpr(42)           # Plain number
+    >>> is_symexpr(42)
     False
     
-    >>> is_symexpr([x, y])       # List (not expression)
+    >>> is_symexpr([x, y])
     False
     """
     if isinstance(obj, Expr):
