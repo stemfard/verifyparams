@@ -29,7 +29,7 @@ def verify_sta_conf_level(
     allowed = {0.80, 0.85, 0.90, 0.95, 0.99, 0.995}
     
     for allowed_val in allowed:
-        if isclose(value, allowed_val, rel_tol=1e-9):
+        if isclose(a=value, b=allowed_val, rel_tol=1e-9):
             return allowed_val
     
     # Not allowed value(s) found
@@ -66,7 +66,7 @@ def verify_sta_sig_level(
     allowed = {0.10, 0.05, 0.01}
     
     for allowed_val in allowed:
-        if isclose(value, allowed_val, rel_tol=1e-9):
+        if isclose(a=value, b=allowed_val, rel_tol=1e-9):
             return allowed_val
     
     # Not allowed value(s) found

@@ -34,24 +34,17 @@ def verify_array_or_matrix(
     ndarray or Matrix
         Validated array/matrix.
     """
-    # Track original type for error messages
     original_type = type(A)
     
-    # Handle known types
     if isinstance(A, (ndarray, MatrixBase)):
-        # Already valid types
         result = A
     elif isinstance(A, DataFrame):
-        # Convert DataFrame to array
         result = A.values
     else:
-        # Try to convert
         try:
             if to_matrix:
-                # Try to create SymPy Matrix
                 result = Matrix(A)
             else:
-                # Try to create numpy array
                 result = asarray(A)
         except Exception as e:
             raise TypeError(
@@ -59,7 +52,6 @@ def verify_array_or_matrix(
                 f"or DataFrame, got {original_type.__name__}"
             ) from e
     
-    # Validate shape
     shape = result.shape
     
     if len(shape) != 2:
@@ -68,7 +60,6 @@ def verify_array_or_matrix(
             f"got shape = {shape}"
         )
     
-    # Validate dimensions
     if nrows is not None and shape[0] != nrows:
         raise ValueError(
             f"Expected {param_name!r} to have {nrows} rows, got {shape[0]}"
@@ -87,7 +78,7 @@ def verify_array_or_matrix(
     return result
 
 
-def verify_array_or_matrix_square(
+def verify_square(
     A: ndarray | Matrix,
     tolerance: float = 1e-12,
     param_name: str = "A"

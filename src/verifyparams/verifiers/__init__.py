@@ -19,6 +19,8 @@ from .dtypes import (
     verify_int,
     verify_float,
     verify_int_or_float,
+    verify_finite,
+    verify_positive,
     verify_complex
 )
 from .func_args import verify_args_count
@@ -29,7 +31,7 @@ from .intervals import (
 )
 from .linalgebra import (
     verify_array_or_matrix,
-    verify_array_or_matrix_square,
+    verify_square,
     verify_linear_system
 )
 from .membership import (
@@ -76,6 +78,8 @@ __all__ = [
     "verify_float",
     "verify_int_or_float",
     "verify_complex",
+    "verify_finite",
+    "verify_positive",
     
     # func_args
     "verify_args_count",
@@ -89,7 +93,7 @@ __all__ = [
 
     # linalgebra
     "verify_array_or_matrix",
-    "verify_array_or_matrix_square",
+    "verify_square",
     "verify_linear_system",
 
     # membership

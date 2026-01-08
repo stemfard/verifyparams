@@ -1,6 +1,6 @@
 from typing import Any, Callable
 
-from verifyparams.core._symbolic import sym_lambdify_expr
+from stemcore import sym_lambdify_expr
 
 
 def verify_function(

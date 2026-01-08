@@ -3,8 +3,8 @@
 verifyparams
 ============
 
-`verifyparams` is a Python library for validating and verifying function 
-parameters, arrays, matrices, dataframes, and other input types in 
+`verifyparams` is a Python library for validating and verifying function
+parameters, arrays, matrices, dataframes, and other input types in
 scientific, engineering and data-intensive applications."
 
 See the webpage for more information and documentation:
@@ -49,6 +49,8 @@ from .verifiers import (
     verify_int,
     verify_float,
     verify_int_or_float,
+    verify_finite,
+    verify_positive,
     verify_complex,
     
     # func_args
@@ -63,7 +65,7 @@ from .verifiers import (
     
     # linalgebra
     verify_array_or_matrix,
-    verify_array_or_matrix_square,
+    verify_square,
     verify_linear_system,
     
     # membership
@@ -110,6 +112,8 @@ __all__ = [
     "verify_float",
     "verify_int_or_float",
     "verify_complex",
+    "verify_positive",
+    "verify_finite",
     
     # func_args
     "verify_args_count",
@@ -123,7 +127,7 @@ __all__ = [
 
     # linalgebra
     "verify_array_or_matrix",
-    "verify_array_or_matrix_square",
+    "verify_square",
     "verify_linear_system",
 
     # membership
@@ -147,8 +151,8 @@ __all__ = [
     "verify_str_numeric",
 ]
 
-#===========================================================================#
-#                                                                           #
-# STEM RESEARCH :: AI . APIs . Cloud :: https://verifyparams.stemfard.org   #
-#                                                                           #
-#===========================================================================#
+#============================================================================#
+#                                                                            #
+# STEM RESEARCH :: AI . APIs . Innovate :: https://verifyparams.stemfard.org #
+#                                                                            #
+#============================================================================#

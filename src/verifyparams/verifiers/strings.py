@@ -181,6 +181,7 @@ def verify_str_identifier(
         allow_empty=False,
         param_name=param_name
     )
+    
 
 def verify_str_alphanumeric(
     value: str,
@@ -194,6 +195,7 @@ def verify_str_alphanumeric(
         allow_empty=allow_empty,
         param_name=param_name
     )
+
 
 def verify_str_numeric(
     value: str,

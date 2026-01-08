@@ -405,7 +405,7 @@ def verify_diff_constant(
         # Find first non-matching difference for error message
         first_diff = diffs[0]
         for i, diff in enumerate(diffs[1:], 1):
-            if not isclose(diff, first_diff, rtol=rtol, atol=atol):
+            if not isclose(a=diff, b=first_diff, rtol=rtol, atol=atol):
                 raise ValueError(
                     f"Differences in {param_name!r} are not constant. "
                     f"diff[{i}] = {diff:.6g}, expected ≈ {first_diff:.6g}"

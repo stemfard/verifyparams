@@ -1,4 +1,4 @@
-from numpy import isclose
+from math import isclose
 
 
 def verify_lower_lte_upper(
@@ -55,7 +55,7 @@ def verify_step_size(
             )
     
     # Step cannot be effectively zero
-    if isclose(step, 0, rel_tol=rel_tol, abs_tol=abs_tol):
+    if isclose(a=step, b=0, rel_tol=rel_tol, abs_tol=abs_tol):
         raise ValueError(f"step is effectively zero: {step}")
     
     # Calculate range and direction
