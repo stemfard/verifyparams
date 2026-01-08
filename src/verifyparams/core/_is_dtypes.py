@@ -2,7 +2,7 @@ from typing import Any
 
 from sympy import Expr, sympify
 
-from verifyparams.core.errors import SYMPIFY_ERRORS
+from verifyparams.core._errors import SYMPIFY_ERRORS
 
 
 def is_maths_function(obj: Any) -> bool:

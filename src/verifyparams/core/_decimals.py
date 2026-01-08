@@ -37,11 +37,13 @@ def numeric_format(value: Any) -> Any:
     
     Examples
     --------
-    >>> numeric_format(3.0)
+    >>> from verifyparams.core._decimals import numeric_format
+    >>>
+    >>> vp.numeric_format(3.0)
     3
-    >>> numeric_format([1.0, 2.5, 3.0])
+    >>> vp.numeric_format([1.0, 2.5, 3.0])
     [1, 2.5, 3]
-    >>> numeric_format(array([1.0, 2.5, 3.0]))
+    >>> vp.numeric_format(array([1.0, 2.5, 3.0]))
     array([1, 2.5, 3], dtype=object)
     """
     # Handle numpy arrays (with Numba optimization for float64)

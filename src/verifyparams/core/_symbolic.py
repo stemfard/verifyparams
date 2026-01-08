@@ -3,8 +3,8 @@ from typing import Any, Callable
 from numpy import array, asarray, ndarray
 from sympy import Expr, SympifyError, lambdify, sympify
 
-from verifyparams.core._is_dtypes import is_function
-from verifyparams.core.errors import SYMPIFY_ERRORS
+from verifyparams.core._is_dtypes import is_maths_function
+from verifyparams.core._errors import SYMPIFY_ERRORS
 
 
 def _symbolic_expr_err(
@@ -59,7 +59,7 @@ def sym_lambdify_expr(
     >>> f([4, 5/7, 3])
     array([ 8.80464777, 25.63556851,  2.71428571])
     """
-    if is_function(fexpr):
+    if is_maths_function(fexpr):
         return fexpr
     elif isinstance(fexpr, (list, tuple)):
         try:
