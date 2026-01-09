@@ -1,6 +1,8 @@
 from typing import Any, Callable
 
-from stemcore import sym_lambdify_expr
+from sympy import SympifyError
+
+from verifyparams.verifiers._core import sym_lambdify_expr
 
 
 def verify_function(
@@ -35,7 +37,7 @@ def verify_function(
             variables=variables,
             par_name=param_name
         )
-    except Exception as e:
+    except (ValueError, TypeError, AttributeError, SympifyError) as e:
         if callable(f):
             raise ValueError(
                 f"Function {param_name!r} is callable but failed "
