@@ -63,30 +63,26 @@ def verify_string(
     >>> verify_string("UPPERCASE", case='lower')
     'uppercase'
     """
-    # Type check
     if not isinstance(value, str):
         raise TypeError(
             f"Expected {param_name!r} to be a string, "
             f"got {type(value).__name__}"
         )
     
-    # Apply preprocessing
     result = value
     
     if strip_whitespace:
-        result = result.strip()
+        result = " ".join(result.split())
     
-    # Check empty after stripping
     if not result and not allow_empty:
         raise ValueError(
             f"{param_name!r} cannot be empty when 'allow_empty' is False"
         )
     
-    # Early return for empty string (if allowed)
+    # Early return for empty string (if allowed) - allow empty is handled above
     if not result:
         return result
     
-    # Check length constraints
     length = len(result)
     
     if length < min_length:
@@ -102,7 +98,6 @@ def verify_string(
             f"characters, got {length} characters"
         )
     
-    # Check allowed characters
     if allowed_chars is not None:
         invalid_chars = []
         for char in result:
@@ -120,11 +115,10 @@ def verify_string(
                 invalid_str = (
                     ", ".join(repr(c) for c in list(unique_invalid)[:k])
                 )
-                error_msg = f"invalid characters including: {invalid_str}"
+                error_msg = f"invalid characters that include: {invalid_str}"
             
             raise ValueError(f"{param_name!r} contains {error_msg}")
     
-    # Check pattern
     if pattern is not None or pattern_str is not None:
         # Compile pattern if string provided
         if pattern is None:

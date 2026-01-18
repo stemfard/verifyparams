@@ -1,5 +1,8 @@
 from typing import Any, Literal, TypeVar, Generic
 
+from numpy import asarray
+from numpy.typing import NDArray
+
 T = TypeVar('T', str, int, float)
 
 class MembershipValidator(Generic[T]):
@@ -20,18 +23,18 @@ class MembershipValidator(Generic[T]):
     
     def validate(
         self, 
-        user_input: Any,
+        value: Any,
         default: T | None = None, 
         param_name: str = "value"
     ) -> T:
         """Validate input against valid items."""
         # Try direct lookup
-        if user_input in self._lookup:
-            return self._lookup[user_input]
+        if value in self._lookup:
+            return self._lookup[value]
         
         # Try case-insensitive for strings
-        if isinstance(user_input, str) and not self.case_sensitive:
-            lookup_key = user_input.lower()
+        if isinstance(value, str) and not self.case_sensitive:
+            lookup_key = value.lower()
             if lookup_key in self._lookup:
                 return self._lookup[lookup_key]
         
@@ -39,7 +42,7 @@ class MembershipValidator(Generic[T]):
         try:
             # Sample type from first valid item
             sample_type = type(self.valid_items[0])
-            converted = sample_type(user_input)
+            converted = sample_type(value)
             if converted in self._lookup:
                 return self._lookup[converted]
         except (ValueError, TypeError):
@@ -54,18 +57,18 @@ class MembershipValidator(Generic[T]):
         
         # prepare error message
         k = 10
-        items_str = ", ".join(repr(item) for item in self.valid_items[:k])
+        items_str = ", ".join(map(str, self.valid_items[:k]))
         if len(self.valid_items) > k:
             items_str += f", ..., {len(self.valid_items) - k} more"
         
         raise ValueError(
             f"Expected {param_name!r} to be one of: {items_str}, "
-            f"got {user_input!r}"
+            f"got {value!r}"
         )
 
 
 def verify_membership(
-    user_input: Any,
+    value: Any,
     valid_items: list[str | int | float],
     case_sensitive: bool = True,
     default: str | int | float | None = None,
@@ -81,7 +84,7 @@ def verify_membership(
     )
     
     return validator.validate(
-        user_input=user_input,
+        value=value,
         param_name=param_name,
         default=default
     )
@@ -89,10 +92,10 @@ def verify_membership(
     
 def verify_membership_allowed(
     values: Any,
-    allowed_values: list[Any],
+    allowed_values: list | tuple | NDArray,
     on_invalid: Literal["raise", "remove", "ignore"] = "raise",
     param_name: str = "values"
-) -> list[Any]:
+) -> list:
     """
     Filter input to keep only values that are in `allowed_values` with 
     configurable behavior.
@@ -101,7 +104,7 @@ def verify_membership_allowed(
     ----------
     values : Any
         Single value or list of values.
-    allowed_values : List[Any]
+    allowed_values : list[str | int | float | int64 | float64]
         Values that are allowed.
     on_invalid : str
         What to do with invalid values:
@@ -116,6 +119,7 @@ def verify_membership_allowed(
     list[any]
         Processed values.
     """
+    data_type = type(values)
     # Convert to list
     if isinstance(values, str):
         input_list = [values]
@@ -131,25 +135,33 @@ def verify_membership_allowed(
     if invalid:
         if on_invalid == "raise":
             if len(invalid) == 1:
-                error_msg = f"The value {invalid[0]!r} is invalid"
+                error_msg = (
+                    f"The value {invalid[0]!r} in {param_name!r} is invalid"
+                )
             else:
                 error_msg = (
-                    f"The values {', '.join(repr(v) for v in invalid)} are "
-                    "invalid"
+                    f"The values {', '.join(map(str, invalid))} in "
+                    f"{param_name!r} are invalid"
                 )
             
             k = 10
-            allowed_str = ', '.join(repr(v) for v in allowed_values[:k])
+            allowed_str = ', '.join(map(str, allowed_values[:k]))
             if len(allowed_values) > k:
                 allowed_str += f", ..., {len(allowed_values) - k} more"
             
             raise ValueError(
-                f"{param_name!r} {error_msg}. "
-                f"Allowed values: {allowed_str}"
+                f"{error_msg}. Allowed values: {allowed_str}"
             )
         elif on_invalid == "remove":
             input_list = [v for v in input_list if v in allowed_set]
         else:
             pass # "ignore" does nothing
     
-    return input_list
+    if data_type == "tuple":
+        return tuple(input_list)
+    elif data_type == "set":
+        return set(input_list)
+    elif data_type == "ndarray":
+        return asarray(input_list)
+    else:
+        return input_list 

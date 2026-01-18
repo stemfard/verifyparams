@@ -3,7 +3,20 @@ from numpy import array, asarray, ndarray
 from sympy import Expr, SympifyError, lambdify, sympify
 
 
-def _is_maths_function(obj: Any) -> bool:
+def _symbolic_expr_err(
+    fexpr: Any,
+    is_variable: bool = False,
+    param_name: str = "fexpr"
+):
+    if is_variable:
+        msg = "have at least one unknown variable or expression"
+    else:
+        msg = "be a symbolic variable or expression"
+    
+    return f"Expected {param_name!r} to {msg}, got {fexpr!r}"
+
+
+def is_maths_function(obj: Any) -> bool:
     """
     Check whether an object is a usable mathematical function.
 
@@ -45,7 +58,7 @@ def _is_maths_function(obj: Any) -> bool:
     return True
 
 
-def _is_symexpr(obj: Any) -> bool:
+def is_symexpr(obj: Any) -> bool:
     """
     Check whether an object is a symbolic expression with free symbols.
 
@@ -100,114 +113,6 @@ def _is_symexpr(obj: Any) -> bool:
             return bool(expr.free_symbols)
 
     return False
-
-
-def _symbolic_expr_err(
-    fexpr: Any,
-    is_variable: bool = False,
-    param_name: str = "fexpr"
-):
-    if is_variable:
-        msg = "have at least one unknown variable or expression"
-    else:
-        msg = "be a symbolic variable or expression"
-    
-    return f"Expected {param_name!r} to {msg}, got {fexpr!r}"
-
-
-def _sym_lambdify_expr(
-    fexpr: str | Callable | list[str] | tuple[str, ...], 
-    is_univariate: bool = False, 
-    variables: list[str] | None = None, 
-    param_name: str = 'fexpr'
-) -> Callable:
-    """
-    Converts a symbolic equation into a NumPy-compatible function.
-
-    Parameters
-    ----------
-    fexpr : {str, callable, list_like}
-        The symbolic equation (or a list of symbolic equations) to be 
-        converted into a Numpy-compatible function.
-    is_univariate : bool, optional (default=False)
-        Whether or not the equation is univariate.
-    variables : array_like, optional (default=None)
-        List of variable names in the equation.
-    param_name : str, optional (default='fexpr')
-        Name to use in error messages to describe the parameter being 
-        checked.
-
-    Returns
-    -------
-    callable
-        A NumPy-compatible function representing the input equation.
-
-    Examples:
-    --------
-    >>> import stemcore as stc
-    >>> f = stc.sym_lambdify_expr('x ** 2 + 2*x + 1')
-    >>> f(2)
-    9
-    >>> equations = ['sin(x1) + x2 ** 2 + log(x3) - 7',
-    ... '3*x1 + 2 ** x2 - x3 ** 3 + 1', 'x1 + x2 + x3 - 5']
-    >>> f = stc.sym_lambdify_expr(equations)
-    >>> f([4, 5/7, 3])
-    array([ -6.14798613, -12.35932929,   2.71428571])
-    """
-    if _is_maths_function(fexpr):
-        return fexpr
-    elif isinstance(fexpr, (list, tuple)):
-        try:
-            f = _sym_expr_to_numpy_function(eqtns=fexpr)
-            return f
-        except (ValueError, TypeError, AttributeError, SympifyError) as e:
-            msg = f"Failed to convert expressions: {e}"
-            raise type(e)(msg) from e
-    else:
-        try:
-            f = sympify(a=fexpr)
-        except (TypeError, ValueError, AttributeError, SympifyError) as e:
-            msg = _symbolic_expr_err(
-                value=fexpr, is_variable=False, param_name=param_name
-            )
-            raise ValueError(msg) from e
-        
-        if not isinstance(f, Expr):
-            raise TypeError(
-                f"Expected symbolic expression for {param_name!r}, "
-                f"got {type(f).__name__}"
-            )
-            
-        # univariate
-        is_univariate = (
-            is_univariate if isinstance(is_univariate, bool) else False
-        )
-        
-        fvars = f.free_symbols
-        nvars = len(fvars)
-        
-        if is_univariate and nvars != 1:
-            raise ValueError(
-                f"Expected a univariate expression {param_name!r}, "
-                f"got expression with {nvars} variables: {fexpr!r}"
-            )
-            
-        if variables is None:
-            fvars_sorted = sorted(fvars, key=str)
-        else:
-            try:
-                fvars_sorted = tuple(variables)
-            except (TypeError, ValueError) as e:
-                raise ValueError(
-                    f"Invalid variables specification for {param_name}: {e}"
-                ) from e
-
-        try:
-            return lambdify(fvars_sorted, f, 'numpy')
-        except (TypeError, ValueError, AttributeError, SympifyError) as e:
-            raise ValueError(
-                f"Failed to lambdify expression for {param_name!r}: {e}"    
-            ) from e
 
 
 def _sym_expr_to_numpy_function(
@@ -281,7 +186,8 @@ def _sym_expr_to_numpy_function(
     """
     if not isinstance(eqtns, (list, tuple, ndarray)):
         raise TypeError(
-            f"Expected list or tuple, got {type(eqtns).__name__}"
+            f"Expected 'eqtns' to be a list or tuple, "
+            f"got {type(eqtns).__name__}"
         )
 
     if not eqtns:
@@ -293,7 +199,7 @@ def _sym_expr_to_numpy_function(
     for i, eq in enumerate(eqtns):
         if not isinstance(eq, str):
             raise TypeError(
-                f"Expected a string for equation at index {i}, "
+                f"Expected equation at index {i} to be a string, "
                 f"got {type(eq).__name__}"
             )
 
@@ -350,18 +256,19 @@ def _sym_expr_to_numpy_function(
             x_arr = asarray(x, dtype=float)
         except (TypeError, ValueError) as e:
             raise TypeError(
-                f"Expected a numeric array-like object for 'x', "
+                "Expected 'x' to be a numeric array-like object, "
                 f"got {type(x).__name__}"
             ) from e
 
         if x_arr.ndim != 1:
             raise ValueError(
-                f"Expected 'x' to be 1D array, got shape {x_arr.shape}"
+                f"Expected 'x' to be a 1D array, got shape {x_arr.shape}"
             )
 
         if len(x_arr) != num_vars:
+            s = "" if num_vars == 1 else "s"
             raise ValueError(
-                f"Expected input length {num_vars}, got {len(x_arr)}"
+                f"Expected 'x' to have {num_vars} equation{s}, got {len(x_arr)}"
             )
 
         if num_vars == 0:
@@ -372,3 +279,98 @@ def _sym_expr_to_numpy_function(
         return array(results, dtype=float)
 
     return f
+
+
+def sym_lambdify_expr(
+    fexpr: str | Callable | list[str] | tuple[str, ...], 
+    is_univariate: bool = False, 
+    variables: list[str] | None = None, 
+    param_name: str = 'fexpr'
+) -> Callable:
+    """
+    Converts a symbolic equation into a NumPy-compatible function.
+
+    Parameters
+    ----------
+    fexpr : {str, callable, list_like}
+        The symbolic equation (or a list of symbolic equations) to be 
+        converted into a Numpy-compatible function.
+    is_univariate : bool, optional (default=False)
+        Whether or not the equation is univariate.
+    variables : array_like, optional (default=None)
+        List of variable names in the equation.
+    param_name : str, optional (default='fexpr')
+        Name to use in error messages to describe the parameter being 
+        checked.
+
+    Returns
+    -------
+    callable
+        A NumPy-compatible function representing the input equation.
+
+    Examples:
+    --------
+    >>> import stemcore as stc
+    >>> f = stc.sym_lambdify_expr('x ** 2 + 2*x + 1')
+    >>> f(2)
+    9
+    >>> equations = ['sin(x1) + x2 ** 2 + log(x3) - 7',
+    ... '3*x1 + 2 ** x2 - x3 ** 3 + 1', 'x1 + x2 + x3 - 5']
+    >>> f = stc.sym_lambdify_expr(equations)
+    >>> f([4, 5/7, 3])
+    array([ -6.14798613, -12.35932929,   2.71428571])
+    """
+    if is_maths_function(fexpr):
+        return fexpr
+    elif isinstance(fexpr, (list, tuple)):
+        try:
+            f = _sym_expr_to_numpy_function(eqtns=fexpr)
+            return f
+        except (ValueError, TypeError, AttributeError, SympifyError) as e:
+            msg = f"Failed to convert expressions: {e}"
+            raise type(e)(msg) from e
+    else:
+        try:
+            f = sympify(a=fexpr)
+        except (TypeError, ValueError, AttributeError, SympifyError) as e:
+            msg = _symbolic_expr_err(
+                value=fexpr, is_variable=False, param_name=param_name
+            )
+            raise ValueError(msg) from e
+        
+        if not isinstance(f, Expr):
+            raise TypeError(
+                f"Expected {param_name!r} to be a symbolic expression, "
+                f"got {type(f).__name__}"
+            )
+            
+        # univariate
+        is_univariate = (
+            is_univariate if isinstance(is_univariate, bool) else False
+        )
+        
+        fvars = f.free_symbols
+        nvars = len(fvars)
+        
+        if is_univariate and nvars != 1:
+            raise ValueError(
+                f"Expected {param_name!r} to be a univariate expression, "
+                f"got expression with {nvars} variables: {fexpr!r}"
+            )
+            
+        if variables is None:
+            fvars_sorted = sorted(fvars, key=str)
+        else:
+            try:
+                fvars_sorted = tuple(variables)
+            except (TypeError, ValueError) as e:
+                raise ValueError(
+                    f"Invalid variables specification for {param_name!r}: {e}"
+                ) from e
+
+        try:
+            return lambdify(fvars_sorted, f, 'numpy')
+        except (TypeError, ValueError, AttributeError, SympifyError) as e:
+            raise ValueError(
+                f"Failed to lambdify expression for {param_name!r}: {e}"    
+            ) from e

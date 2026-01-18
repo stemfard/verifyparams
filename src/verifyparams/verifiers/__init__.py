@@ -6,7 +6,9 @@ from .arraylike import (
     verify_diff_constant,
     verify_strictly_increasing,
     verify_distinct,
-    verify_not_constant
+    verify_not_constant,
+    verify_lower_lte_upper_arr,
+    verify_numeric_arr
 )
 from .dataframes import (
     verify_axis,
@@ -55,6 +57,10 @@ from .strings import (
     verify_str_numeric
 )
 
+from .symbolic import (
+    verify_symbolic_expr
+)
+
 __all__ = [
     # arraylike
     "verify_elements_in_range",
@@ -65,6 +71,8 @@ __all__ = [
     "verify_strictly_increasing",
     "verify_distinct",
     "verify_not_constant",
+    "verify_lower_lte_upper_arr",
+    "verify_numeric_arr",
 
     # dataframes
     "verify_axis",
@@ -115,4 +123,7 @@ __all__ = [
     "verify_str_identifier",
     "verify_str_alphanumeric",
     "verify_str_numeric",
+    
+    # symbolic
+    "verify_symbolic_expr"
 ]

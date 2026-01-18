@@ -48,7 +48,9 @@ def verify_step_size(
         Tolerances for floating point comparisons.
     """
     # Validate inputs
-    for name, val in [("start", start), ("stop", stop), ("step", step)]:
+    params = ["start", "stop", "step"]
+    vals = [start, stop, step]
+    for name, val in zip(params, vals):
         if not isinstance(val, (int, float)):
             raise TypeError(
                 f"Expected {name!r} to be numeric, got {type(val).__name__}"

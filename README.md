@@ -26,7 +26,7 @@ Example usage:
 
 ```python
 # Validate numeric input
->>> verify_numeric(param_name='x', user_input=10)
+>>> verify_numeric(param_name='x', value=10)
 ```
 
 ```python

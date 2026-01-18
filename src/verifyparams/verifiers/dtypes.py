@@ -59,7 +59,14 @@ def verify_boolean(
     return default
 
 
-def verify_int(value: Any, param_name: str = "value") -> int:
+def verify_int(
+    value: Any,
+    allow_none: bool = False,
+    param_name: str = "value"
+) -> int:
+    
+    if value is None and allow_none:
+        return None
     
     if not isinstance(value, int):
         raise TypeError(
@@ -70,7 +77,15 @@ def verify_int(value: Any, param_name: str = "value") -> int:
     return value
     
 
-def verify_float(value: Any, param_name: str = "value") -> float:
+def verify_float(
+    value: Any,
+    allow_none: bool = False,
+    allow_infinite: bool = False,
+    param_name: str = "value"
+) -> float:
+    
+    if value is None and allow_none:
+        return None
     
     if not isinstance(value, float):
         raise TypeError(
@@ -78,12 +93,21 @@ def verify_float(value: Any, param_name: str = "value") -> float:
             f"got {type(value).__name__}"
         )
         
-    verify_finite(value=value, param_name=param_name)
+    if not allow_infinite:
+        verify_finite(value=value, param_name=param_name)
         
     return value
 
 
-def verify_int_or_float(value: Any, param_name: str = "value") -> float:
+def verify_int_or_float(
+    value: Any,
+    allow_none: bool = False,
+    allow_infinite: bool = False,
+    param_name: str = "value"
+) -> float:
+    
+    if value is None and allow_none:
+        return None
     
     if not isinstance(value, (int, float)):
         raise TypeError(
@@ -91,7 +115,8 @@ def verify_int_or_float(value: Any, param_name: str = "value") -> float:
             f"got {type(value).__name__}"
         )
         
-    verify_finite(value=value, param_name=param_name)
+    if not allow_infinite:
+        verify_finite(value=value, param_name=param_name)
         
     return value
 
@@ -100,7 +125,7 @@ def verify_finite(value: Any, param_name: str = "value") -> int | float:
     
     if not math.isfinite(value):
         raise ValueError(
-            f"Expected a finite number for {param_name!r}, got {value}"
+            f"Expected {param_name!r} to be a finite number, got {value}"
         )
     
     return value

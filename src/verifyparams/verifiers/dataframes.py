@@ -129,7 +129,7 @@ def verify_axis(
     
     
 def verify_dframe(
-    user_input: Any,
+    value: Any,
     convert: bool = True,
     require_columns: list[int | str] | None = None,
     require_index: bool = False,
@@ -140,7 +140,7 @@ def verify_dframe(
     
     Parameters
     ----------
-    user_input : Any
+    value : Any
         Input to validate. Can be:
         - pandas DataFrame
         - pandas Series
@@ -178,17 +178,17 @@ def verify_dframe(
     TypeError: 'dataframe' must be a DataFrame
     """
     # Already a DataFrame
-    if isinstance(user_input, DataFrame):
-        df = user_input
+    if isinstance(value, DataFrame):
+        df = value
     
     # Try to convert if allowed
     elif convert:
         try:
-            df = DataFrame(user_input)
+            df = DataFrame(value)
         except TypeError as e:
             raise TypeError(
                 f"Expected {param_name!r} to be a DataFrame, "
-                f"got {type(user_input).__name__}"
+                f"got {type(value).__name__}"
             ) from e
         except ValueError as e:
             raise ValueError(
@@ -197,7 +197,7 @@ def verify_dframe(
     else:
         raise TypeError(
             f"Expected {param_name!r} to be a DataFrame, "
-            f"got {type(user_input).__name__}"
+            f"got {type(value).__name__}"
         ) from e
     
     # Validate requirements
@@ -218,7 +218,7 @@ def verify_dframe(
 
 
 def verify_series(
-    user_input: Any,
+    value: Any,
     convert: bool = True,
     allow_scalar: bool = False,
     require_name: bool = False,
@@ -230,7 +230,7 @@ def verify_series(
     
     Parameters
     ----------
-    user_input : Any
+    value : Any
         Input to validate. Can be:
         - pandas Series
         - List, tuple, numpy array
@@ -270,27 +270,27 @@ def verify_series(
     """
     msg_type = (
         f"Expected {param_name!r} to be a Series, "
-        f"got {type(user_input).__name__}"
+        f"got {type(value).__name__}"
     )
     msg_value = f"{param_name!r} cannot be converted to a Series: {e}"
     
     # Already a Series
-    if isinstance(user_input, Series):
-        s = user_input
+    if isinstance(value, Series):
+        s = value
     
     # Try to convert if allowed
     elif convert:
         # Handle scalar if allowed
-        if allow_scalar and not isinstance(user_input, (list, tuple, dict)):
+        if allow_scalar and not isinstance(value, (list, tuple, dict)):
             try:
-                s = Series([user_input])
+                s = Series([value])
             except TypeError as e:
                 raise TypeError(msg_type) from e
             except ValueError as e:
                 raise ValueError(msg_value) from e
         else:
             try:
-                s = Series(user_input)
+                s = Series(value)
             except TypeError as e:
                 raise TypeError(msg_type) from e
             except ValueError as e:

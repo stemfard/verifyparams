@@ -37,6 +37,8 @@ from .verifiers import (
     verify_strictly_increasing,
     verify_distinct,
     verify_not_constant,
+    verify_lower_lte_upper_arr,
+    verify_numeric_arr,
     
     # dataframes
     verify_axis,
@@ -80,13 +82,17 @@ from .verifiers import (
     verify_sta_conf_level,
     verify_sta_sig_level,
     verify_sta_alternative,
+    verify_sta_decision,
     
     # strings
     verify_string,
     verify_str_email,
     verify_str_identifier,
     verify_str_alphanumeric,
-    verify_str_numeric
+    verify_str_numeric,
+    
+    # symbolic
+    verify_symbolic_expr
 )
 
 __all__ = [
@@ -99,6 +105,8 @@ __all__ = [
     "verify_strictly_increasing",
     "verify_distinct",
     "verify_not_constant",
+    "verify_lower_lte_upper_arr",
+    "verify_numeric_arr",
 
     # dataframes
     "verify_axis",
@@ -142,6 +150,7 @@ __all__ = [
     "verify_sta_conf_level",
     "verify_sta_sig_level",
     "verify_sta_alternative",
+    "verify_sta_decision",
 
     # strings
     "verify_string",
@@ -149,10 +158,13 @@ __all__ = [
     "verify_str_identifier",
     "verify_str_alphanumeric",
     "verify_str_numeric",
+    
+    # symbolic
+    "verify_symbolic_expr"
 ]
 
-#============================================================================#
-#                                                                            #
-# STEM RESEARCH :: AI . APIs . Innovate :: https://verifyparams.stemfard.org #
-#                                                                            #
-#============================================================================#
+#==============================================================================#
+#                                                                              #
+# STEM RESEARCH :: AI . APIs . Innovation :: https://verifyparams.stemfard.org #
+#                                                                              #
+#==============================================================================#

@@ -4,13 +4,182 @@ from numpy import (
     all, allclose, array_equal, asarray, count_nonzero, float64, floating,
     fromiter, isclose, issubdtype, ndarray, diff, any, where
 )
+from numpy.typing import NDArray
 
 from verifyparams.core._strings import str_data_join_contd
 from verifyparams.core._decimals import numeric_format
 
+from verifyparams.verifiers.dtypes import verify_int
+
+
+def verify_numeric_arr(
+    value: list | tuple | NDArray,
+    n: int | None = None,
+    all_integers: bool = False,
+    all_positive: bool = False,
+    allow_zero: bool = False,
+    param_name: str = "value"
+    
+) -> list | tuple | NDArray:
+    
+    try:
+        arr = asarray(value, dtype=float)
+    except (ValueError, TypeError) as e:
+        raise ValueError(
+            f"Expected all values of {param_name!r} to be numeric, "
+            f"got {value}"
+        ) from e
+        
+    if n is not None:
+        verify_data_length(value=value, n=n, param_name=param_name)
+        
+    if all_integers:
+        count_invalid = count_nonzero(arr % 1 != 0)
+        if count_invalid > 0:
+            invalid = arr[arr % 1 != 0]
+            k = len(invalid)
+            s = "" if k == 1 else "s"
+            raise ValueError(
+                f"Expected all values of {param_name!r} to be integers, "
+                f"got {k} non-integer value{s}: {str_data_join_contd(invalid)}"
+            )
+            
+    if all_positive:
+        if allow_zero:
+            count_invalid = count_nonzero(arr < 0)
+        else:
+            count_invalid = count_nonzero(arr <= 0)
+            
+        if count_invalid > 0:
+            invalid = arr[arr % 1 != 0]
+            k = len(invalid)
+            s = "" if k == 1 else "s"
+            raise ValueError(
+                f"Expected all values of {param_name!r} to be positive, "
+                f"got {k} negative value{s}: {str_data_join_contd(invalid)}"
+            )
+    
+    return value
+
+
+def verify_data_length(
+    value: list | tuple | NDArray,
+    n: int | None = None,
+    param_name: str = "value"
+) -> list | tuple | NDArray:
+    
+    if not isinstance(value, (list, tuple, ndarray)):
+        raise TypeError(
+            f"Expected {param_name!r} to be a list, tuple or ndarray, "
+            f"got {type(value).__name__}"
+        )
+        
+    verify_int(value=n, param_name=param_name)
+    
+    m = len(value)
+    
+    if m != n:
+        s = "" if m == 1 else "s"
+        raise ValueError(
+            f"Expected {param_name!r} to have exactly {n} elements, "
+            f"got {m} element{s}"
+        )
+    
+    return value
+
+
+def verify_lower_lte_upper_arr(
+    x: list | tuple | NDArray,
+    y: list | tuple | NDArray,
+    allow_equal: bool = False,
+    to_array: bool = False,
+    param_names: str = ("x", "y")
+) -> list | tuple | NDArray:
+    """
+    Check all lower array values are less than upper array values
+    
+    Parameters
+    ----------
+    x : list | tuple | NDArray
+        Lower.
+    y : list | tuple | NDArray
+        Upper.
+    allow_equal: bool
+        Whether to allow equal values.
+    to_array : bool
+        Whether to convert to a Numpy array
+    param_names : str
+        Parameter names.
+    
+    Returns
+    -------
+    x, y : list | tuple | NDArray
+        Validated values.
+    """
+    if isinstance(x, ndarray):
+        arr1 = x
+    else:
+        # Bulk conversion using numpy
+        try:
+            if hasattr(x, '__len__') and not isinstance(x, (str, bytes)):
+                arr1 = asarray(x, dtype=float)
+            else:
+                # For generators/iterators, use `fromiter()` to avoid 
+                # intermediate lists
+                arr1 = fromiter(x, dtype=float)
+        except (ValueError, TypeError) as e:
+            raise TypeError(
+                f"Cannot convert {param_name_x!r} to numeric array: {e}"
+            ) from e
+            
+    if isinstance(y, ndarray):
+        arr2 = y
+    else:
+        # Bulk conversion using numpy
+        try:
+            if hasattr(y, '__len__') and not isinstance(y, (str, bytes)):
+                arr2 = asarray(y, dtype=float)
+            else:
+                # For generators/iterators, use `fromiter()` to avoid
+                # intermediate lists
+                arr2 = fromiter(y, dtype=float)
+        except (ValueError, TypeError) as e:
+            raise TypeError(
+                f"Cannot convert {param_name_y!r} to numeric array: {e}"
+            ) from e
+    
+    # Fast validation using numpy ufuncs
+    if allow_equal:
+        invalid_count = count_nonzero(arr1 > arr2)
+    else:
+        invalid_count = count_nonzero(arr1 >= arr2)
+    
+    if invalid_count > 0:
+        if allow_equal:
+            invalid_values = zip(arr1[arr1 > arr2], arr2[arr1 > arr2])
+        else:
+            invalid_values = zip(arr1[arr1 >= arr2], arr2[arr1 >= arr2])
+
+        invalid_values_list = list(invalid_values)
+        n = len(invalid_values_list)
+        s = "" if n == 1 else "s"
+        
+        try:
+            param_name_x, param_name_y = param_names
+        except (TypeError, ValueError):
+            param_name_x, param_name_y = ("x", "y")
+        
+        raise ValueError(
+            f"Expected corresponding values of {param_name_x!r} to be less "
+            f"than those of {param_name_y!r}, got {invalid_values_list} "
+            f"invalid pair{s}"
+        )
+    
+    return arr1 if to_array else x, arr2 if to_array else y
+
 
 def verify_elements_in_range(
-    data: list[int | float] | ndarray,
+    data: list[int | float] | NDArray,
     lower: int | float = 0,
     upper: int | float = 4,
     par_name: str = "data"
@@ -32,7 +201,7 @@ def verify_elements_in_range(
     
     Returns
     -------
-    data : list | tuple | ndarray
+    data : list | tuple | NDArray
         The input sequence if all elements are within range.
     
     Raises
@@ -152,17 +321,17 @@ def verify_all_integers(
 
 
 def verify_all_positive(
-    data: list | tuple | ndarray,
+    data: list | tuple | NDArray,
     include_zero: bool = False,
     to_array: bool = False,
     param_name: str = 'data'
-) -> list | tuple | ndarray:
+) -> list | tuple | NDArray:
     """
     Simple and fast positive validation.
     
     Parameters
     ----------
-    data : list | tuple | ndarray
+    data : list | tuple | NDArray
         Input to validate.
     include_zero : bool
         Whether to allow zero.
@@ -173,7 +342,7 @@ def verify_all_positive(
     
     Returns
     -------
-    arr : list | tuple | ndarray
+    arr : list | tuple | NDArray
         Validated values.
     """
     if isinstance(data, ndarray):
@@ -331,12 +500,12 @@ def verify_len_equal(
 
 
 def verify_diff_constant(
-    user_input: Any,
+    value: Any,
     rtol: float = 1e-9,
     atol: float = 1e-12,
     to_array: bool = False,
     param_name: str = 'x'
-) -> list[int | float] | tuple[int | float] | ndarray:
+) -> list[int | float] | tuple[int | float] | NDArray:
     """
     Verify that differences between consecutive elements are constant.
 
@@ -345,7 +514,7 @@ def verify_diff_constant(
 
     Parameters
     ----------
-    user_input : Any
+    value : Any
         Input sequence (list, tuple, or NumPy array) containing 
         numeric values.
     rtol : float, optional
@@ -360,35 +529,35 @@ def verify_diff_constant(
 
     Returns
     -------
-    result : list[int | float] | tuple[int | float] | ndarray
+    result : list[int | float] | tuple[int | float] | NDArray
         The validated input sequence, with its original type preserved
         unless `to_array=True`.
 
     Raises
     ------
     TypeError
-        If `user_input` is not array-like or contains non-numeric values.
+        If `value` is not array-like or contains non-numeric values.
     ValueError
         If differences between consecutive elements are not constant.
     """
     msg = (
         f"Expected {param_name!r} to be numeric array-like, "
-        f"got {type(user_input).__name__}"
+        f"got {type(value).__name__}"
     )
     
-    if isinstance(user_input, list):
+    if isinstance(value, list):
         val_type = "list"
-    elif isinstance(user_input, tuple):
+    elif isinstance(value, tuple):
         val_type = "tuple"
     else:
-        if to_array or isinstance(user_input, ndarray):
+        if to_array or isinstance(value, ndarray):
             val_type = "array"
         else:
             raise TypeError(msg)
     
-    if not isinstance(user_input, ndarray):
+    if not isinstance(value, ndarray):
         try:
-            arr = asarray(user_input, dtype=float64)
+            arr = asarray(value, dtype=float64)
         except TypeError as e:
             raise TypeError(msg) from e
         except ValueError as e:
@@ -408,7 +577,8 @@ def verify_diff_constant(
             if not isclose(a=diff, b=first_diff, rtol=rtol, atol=atol):
                 raise ValueError(
                     f"Differences in {param_name!r} are not constant. "
-                    f"diff[{i}] = {diff:.6g}, expected ≈ {first_diff:.6g}"
+                    f"diff[{i}] = {diff:.{atol}g}, "
+                    f"expected ≈ {first_diff:.{atol}g}"
                 )
                 
     if val_type == "list":
@@ -422,15 +592,15 @@ def verify_diff_constant(
 
 
 def verify_strictly_increasing(
-    user_input: Any,
+    value: Any,
     param_name: str = "x"
-) -> list[int | float] | tuple[int | float] | ndarray:
+) -> list[int | float] | tuple[int | float] | NDArray:
     """
     Fast strict increasing check using numpy.
     
     Parameters
     ----------
-    user_input : array_like
+    value : array_like
         Input sequence.
     param_name : str
         Parameter name.
@@ -441,11 +611,11 @@ def verify_strictly_increasing(
         Validated array.
     """
     try:
-        arr = asarray(user_input, dtype=float64)
+        arr = asarray(value, dtype=float64)
     except TypeError as e:
         raise TypeError(
             f"Expected {param_name!r} to be numeric array-like, "
-            f"got {type(user_input).__name__}"
+            f"got {type(value).__name__}"
         ) from e
     except ValueError as e:
         raise ValueError(str(e)) from e
@@ -470,16 +640,20 @@ def verify_strictly_increasing(
 
 
 def verify_distinct(
-    x: list | tuple | ndarray,
-    y: list | tuple | ndarray,
+    x: list | tuple | NDArray,
+    y: list | tuple | NDArray,
     tolerance: float = 1e-12,
-    param_name_x: str = 'x',
-    param_name_y: str = 'y',
+    param_names: str = ('x', 'y'),
     check_length: bool = True
-) -> tuple[list | tuple | ndarray, list | tuple | ndarray]:
+) -> tuple[list | tuple | NDArray, list | tuple | NDArray]:
     """
     Distinct array verification.
     """
+    try:
+        param_name_x, param_name_y = param_names
+    except (TypeError, ValueError):
+        param_name_x, param_name_y = ("x", "y")
+        
     # Type validation
     if not isinstance(x, (list, tuple, ndarray)):
         raise TypeError(
@@ -536,16 +710,16 @@ def verify_distinct(
     
 
 def verify_not_constant(
-    user_input: Any,
+    value: Any,
     param_name: str = "x",
     tolerance: float = 1e-12
-) -> list | ndarray:
+) -> list | NDArray:
     """
     Verify that an array is not constant (all values not the same).
     
     Parameters
     ----------
-    user_input : array_like
+    value : array_like
         Input to check.
     param_name : str
         Parameter name for error messages.
@@ -580,23 +754,23 @@ def verify_not_constant(
     """
     # Convert to numpy array
     try:
-        arr = asarray(user_input)
+        arr = asarray(value)
     except TypeError as e:
         raise TypeError(
             f"Expected {param_name!r} to be array-like, "
-            f"got {type(user_input).__name__}"
+            f"got {type(value).__name__}"
         ) from e
     except ValueError as e:
         raise ValueError(str(e)) from e
     
     # Handle empty or single-element arrays
     if arr.size < 2:
-        return user_input if not isinstance(user_input, ndarray) else arr
+        return value if not isinstance(value, ndarray) else arr
     
     # Check if constant
     if arr.ndim == 0:
         # Scalar - always "constant"
-        return user_input if not isinstance(user_input, ndarray) else arr
+        return value if not isinstance(value, ndarray) else arr
     
     # Check using tolerance for floating point
     if issubdtype(arr.dtype, floating):
@@ -617,9 +791,9 @@ def verify_not_constant(
             )
     
     # Return in appropriate format
-    if isinstance(user_input, ndarray):
+    if isinstance(value, ndarray):
         return arr
-    elif isinstance(user_input, list):
+    elif isinstance(value, list):
         return arr.tolist()
     else:
-        return user_input if hasattr(user_input, '__iter__') else arr.tolist()
+        return value if hasattr(value, '__iter__') else arr.tolist()

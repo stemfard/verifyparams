@@ -2,7 +2,7 @@ from typing import Any
 
 from numpy import asarray, ndarray
 from pandas import DataFrame
-from sympy import Matrix, MatrixBase
+from sympy import Matrix, MatrixBase, SympifyError, sympify
 
 
 def verify_array_or_matrix(
@@ -43,10 +43,13 @@ def verify_array_or_matrix(
     else:
         try:
             if to_matrix:
-                result = Matrix(A)
+                try:
+                    result = Matrix(A)
+                except (TypeError, ValueError, AttributeError, SympifyError):
+                    result = Matrix(sympify(A))
             else:
                 result = asarray(A)
-        except Exception as e:
+        except (TypeError, ValueError, AttributeError, SympifyError) as e:
             raise TypeError(
                 f"Expected {param_name!r} to be array-like, Matrix, "
                 f"or DataFrame, got {original_type.__name__}"
@@ -74,7 +77,10 @@ def verify_array_or_matrix(
         raise ValueError(
             f"Expected {param_name!r} to be square, got shape = {shape}"
         )
-    
+        
+    if to_matrix:
+        return result if isinstance(result, MatrixBase) else Matrix(result)
+
     return result
 
 
@@ -100,12 +106,12 @@ def verify_square(
     ndarray
         Validated square matrix.
     """
-    is_matrix = True if isinstance(A, MatrixBase) else False
+    is_sympy_matrix = True if isinstance(A, MatrixBase) else False
     
     if not isinstance(A, ndarray):
         try:
             A = asarray(A)
-        except TypeError as e:
+        except (TypeError, ValueError) as e:
             raise TypeError(
                 f"Expected {param_name!r} to be array-like, "
                 f"got {type(A).__name__}"
@@ -123,7 +129,7 @@ def verify_square(
             f"Expected {param_name!r} to be square, got shape ({rows}, {cols})"
         )
     
-    return Matrix(A) if is_matrix else A
+    return Matrix(A) if is_sympy_matrix else A
 
 
 def verify_linear_system(
@@ -153,7 +159,7 @@ def verify_linear_system(
         Validated (A, b).
     """
     # Convert to arrays
-    is_matrix = True if isinstance(A, MatrixBase) else False
+    is_sympy_matrix = True if isinstance(A, MatrixBase) else False
     
     try:
         A = asarray(A)
@@ -216,7 +222,7 @@ def verify_linear_system(
             f"got shape ({a_rows}, {a_cols})"
         )
         
-    if is_matrix:
+    if is_sympy_matrix:
         A, b = Matrix(A), Matrix(b)
     
     return A, b

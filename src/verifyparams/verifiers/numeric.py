@@ -8,7 +8,7 @@ def verify_decimals(
     value: Any,
     a: int = -1,
     b: int = 14,
-    param_name: str = "decimals"
+    param_name: str = "decimals: Decimal points"
 ) -> int:
     """
     Validate a `value` parameter (for rounding/formatting operations).
@@ -59,12 +59,12 @@ def verify_decimals(
 
 def verify_numeric(
     value: Any,
-    param_name: str = "value",
     limits: list[int | float] | None = None,
     boundary: Literal["inclusive", "exclusive"] = "inclusive",
     is_positive: bool = False,
     is_integer: bool = False,
-    allow_none: bool = False
+    allow_none: bool = False,
+    param_name: str = "value"
 ) -> int | float | None:
     """
     Validate and convert numeric input values.
@@ -73,18 +73,19 @@ def verify_numeric(
     ----------
     value : Any
         The input value to validate.
-    param_name : str, optional (default='value')
-        Name of the parameter for error messages.
     limits : list[int | float], optional
         List of [lower, upper] limits for the value.
     boundary : {'inclusive', 'exclusive'}, optional (default='inclusive')
-        Whether limits include ('inclusive') or exclude ('exclusive') boundaries.
+        Whether limits include ('inclusive') or exclude ('exclusive') 
+        boundaries.
     is_positive : bool, optional (default=False)
         If True, value must be positive (> 0).
     is_integer : bool, optional (default=False)
         If True, value must be (or be convertible to) an integer.
     allow_none : bool, optional (default=False)
         If True, None values are allowed and returned as None.
+    param_name : str, optional (default='value')
+        Name of the parameter for error messages.
     
     Returns
     -------
@@ -106,20 +107,15 @@ def verify_numeric(
     
     # Try to convert to float first
     try:
-        # Handle common numeric types
         if isinstance(value, (int, float)):
             value = float(value)
         elif isinstance(value, str):
-            # Clean string input
             cleaned = value.strip()
             if not cleaned:
-                raise ValueError(
-                    f"{value!r} cannot be empty"
-                )
+                raise ValueError(f"{value!r} cannot be empty")
             value = float(cleaned)
         else:
-            # Try general conversion
-            value = float(value)
+            value = float(value) # will fail if not convertable
     except TypeError as e:
         raise TypeError(
             f"Expected {param_name!r} to be a number (integer or float), "
@@ -142,8 +138,7 @@ def verify_numeric(
     if is_integer:
         if not value.is_integer():
             raise ValueError(
-                f"Expected {param_name!r} to be an integer, "
-                f"got {value!r}"
+                f"Expected {param_name!r} to be an integer, got {value!r}"
             )
         value = int(value)
     
@@ -155,7 +150,13 @@ def verify_numeric(
                 f"[lower, upper], got {limits!r}"
             )
         
-        lower, upper = limits[0], limits[1]
+        verify_int_or_float(value=limits[0], param_name="limits[0]")
+        verify_int_or_float(value=limits[1], param_name="limits[1]")
+        
+        lower, upper = min(limits), max(limits)
+        
+        if lower == upper:
+            raise ValueError("'limits' must have different numeric values.")
         
         if boundary == 'inclusive':
             in_range = lower <= value <= upper
@@ -163,7 +164,7 @@ def verify_numeric(
             in_range = lower < value < upper
         else:
             raise ValueError(
-                "Expected 'boundary' to be one either 'inclusive' or "
+                "Expected 'boundary' to be either 'inclusive' or "
                 f"'exclusive', got {boundary!r}"
             )
         
