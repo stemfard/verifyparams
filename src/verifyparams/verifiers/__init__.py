@@ -47,7 +47,8 @@ from .numeric import (
 from .stats import (
     verify_sta_conf_level,
     verify_sta_sig_level,
-    verify_sta_alternative
+    verify_sta_alternative,
+    verify_sta_decision,
 )
 from .strings import (
     verify_string,
@@ -116,6 +117,7 @@ __all__ = [
     "verify_sta_conf_level",
     "verify_sta_sig_level",
     "verify_sta_alternative",
+    "verify_sta_decision",
 
     # strings
     "verify_string",
